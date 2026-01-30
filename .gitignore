@@ -1,0 +1,12 @@
+.DS_Store
+build
+node_modules
+web/.next
+web/node_modules
+*.xcuserdata
+*.xcworkspace
+*.idea
+.idea/
+.vscode/
+Cargo.lock
+*.log
