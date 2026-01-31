@@ -65,6 +65,8 @@ Critical constraints:
 - Do not include placeholders, caveats, or meta-commentary about missing data.
 - If sources are limited, generalize carefully while staying grounded in the provided items.
 - Avoid duplicate sentences across sections; each item should be unique.
+- Ensure that each distinct source listed above is referenced at least once in Other Stories or Deep Dives so the brief reflects the full set of provided news.
+- When you mention a source, use the exact source name from the list and base the sentence on the associated title and URL so it is grounded.
 
 ${newsLines.length === 0 ? "- No items available" : newsLines}`;
 }
