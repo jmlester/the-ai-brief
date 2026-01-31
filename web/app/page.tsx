@@ -374,7 +374,7 @@ export default function Page() {
       setShareStatus("Generate a brief first.");
       return;
     }
-    const text = `The AI Brief\n${brief.topline}\n${brief.signalSummary}\n${brief.watchlist?.join("\n") ?? ""}`.trim();
+    const text = `The AI Brief\n${brief.headline}\n${brief.summary}\n${brief.radar?.join("\n") ?? ""}`.trim();
     const payload = `${text}\n${typeof window !== "undefined" ? window.location.href : ""}`;
     try {
       if (navigator.share) {
