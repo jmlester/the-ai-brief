@@ -79,6 +79,7 @@ export default function Page() {
     radar: false
   });
   const [sourceView, setSourceView] = useState<"selected" | "recommended">("selected");
+  const [sourceSearch, setSourceSearch] = useState("");
   const [customSource, setCustomSource] = useState({
     name: "",
     url: "",
@@ -89,6 +90,7 @@ export default function Page() {
     ingestURL: "",
     allowScrape: false
   });
+  const [webSearchQuery, setWebSearchQuery] = useState("");
 
   useEffect(() => {
     const storedSettings = loadSettings();
@@ -146,6 +148,14 @@ export default function Page() {
     () => sources.filter((source) => !source.isEnabled && !source.isCustom),
     [sources]
   );
+  const filteredRecommended = useMemo(() => {
+    const query = sourceSearch.trim().toLowerCase();
+    if (!query) return recommendedList;
+    return recommendedList.filter((source) => {
+      const haystack = `${source.name} ${source.category} ${source.summary}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [recommendedList, sourceSearch]);
 
   const toggleSource = (id: string, key: "isEnabled" | "isPreferred") => {
     setSources((prev) =>
@@ -402,6 +412,20 @@ export default function Page() {
       setShareStatus("Share canceled.");
     }
     window.setTimeout(() => setShareStatus(""), 2000);
+  };
+
+  const launchWebSearch = () => {
+    const query = webSearchQuery.trim();
+    if (!query) {
+      setShareStatus("Type a search query first.");
+      return;
+    }
+    const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query + " ai newsletter")}`;
+    if (typeof window !== "undefined") {
+      window.open(searchUrl, "_blank", "noopener");
+      setShareStatus(`Searching the web for “${query}”...`);
+      window.setTimeout(() => setShareStatus(""), 2000);
+    }
   };
 
   const sourceHealthPanel = (
@@ -969,11 +993,40 @@ export default function Page() {
               ) : (
                 <div className="recommended">
                   <div className="kicker">
-                    Explore hundreds of carefully curated feeds. Click “Add” to copy one into your
-                    selected sources list.
+                    Explore hundreds of carefully curated feeds. Search, then click “Add” to enable.
+                  </div>
+                  <div className="field">
+                    <label className="label" htmlFor="source-search">
+                      Search recommended
+                    </label>
+                    <input
+                      id="source-search"
+                      className="input"
+                      placeholder="Filter by name, category, summary"
+                      value={sourceSearch}
+                      onChange={(event) => setSourceSearch(event.target.value)}
+                    />
+                  </div>
+                  <div className="field">
+                    <label className="label" htmlFor="source-web-search">
+                      Search the web for AI sources (opens DuckDuckGo)
+                    </label>
+                    <div className="row" style={{ flexWrap: "wrap" }}>
+                      <input
+                        id="source-web-search"
+                        className="input"
+                        style={{ flex: "1 1 220px" }}
+                        value={webSearchQuery}
+                        onChange={(event) => setWebSearchQuery(event.target.value)}
+                        placeholder="e.g. ai newsletter, AI policy news"
+                      />
+                      <button className="btn btnPrimary" type="button" onClick={launchWebSearch}>
+                        Search web
+                      </button>
+                    </div>
                   </div>
                   <div className="recommendedGrid">
-                    {recommendedList.map((source) => (
+                    {filteredRecommended.map((source) => (
                       <div key={source.id} className="sourceCard">
                         <div className="sourceHeader">
                           <div>
