@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildPrompt } from "../../../lib/prompt";
 import { fetchRecentNews } from "../../../lib/rss";
-import { NewsItem, Source } from "../../../lib/types";
+import { NewsItem, Source, SourceResult } from "../../../lib/types";
 
 export const runtime = "nodejs";
 
@@ -39,6 +39,53 @@ function dedupe(items: NewsItem[]) {
     }
   }
   return Array.from(seen.values());
+}
+
+function sortPromptItems(items: NewsItem[], preferredSet: Set<string>) {
+  items.sort((a, b) => {
+    const lhsPreferred = preferredSet.has(a.source);
+    const rhsPreferred = preferredSet.has(b.source);
+    if (lhsPreferred !== rhsPreferred) {
+      return lhsPreferred ? -1 : 1;
+    }
+    return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+  });
+}
+
+function buildPromptItems(rawItems: NewsItem[], preferredSet: Set<string>) {
+  const deduped = dedupe(rawItems.filter((item) => !item.isPlaceholder));
+  sortPromptItems(deduped, preferredSet);
+  return deduped;
+}
+
+function ensureSourceCoverage(
+  promptItems: NewsItem[],
+  rawItems: NewsItem[],
+  results: SourceResult[],
+  preferredSet: Set<string>
+) {
+  const promptSources = new Set(promptItems.map((item) => item.source));
+  const itemBySource = new Map<string, NewsItem>();
+  for (const item of rawItems) {
+    if (item.isPlaceholder) continue;
+    if (promptSources.has(item.source)) continue;
+    if (!itemBySource.has(item.source)) {
+      itemBySource.set(item.source, item);
+    }
+  }
+
+  for (const result of results) {
+    if (result.status !== "success" || (result.count ?? 0) <= 0) continue;
+    if (promptSources.has(result.sourceName)) continue;
+    const candidate = itemBySource.get(result.sourceName);
+    if (candidate) {
+      promptItems.push(candidate);
+      promptSources.add(result.sourceName);
+    }
+  }
+
+  sortPromptItems(promptItems, preferredSet);
+  return promptItems;
 }
 
 export async function POST(request: Request) {
@@ -95,15 +142,7 @@ export async function POST(request: Request) {
         let items = result.items;
         let sourceResults = result.results;
 
-        let promptItems = dedupe(items.filter((item) => !item.isPlaceholder));
-        promptItems.sort((a, b) => {
-          const lhsPreferred = preferredSet.has(a.source);
-          const rhsPreferred = preferredSet.has(b.source);
-          if (lhsPreferred !== rhsPreferred) {
-            return lhsPreferred ? -1 : 1;
-          }
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-        });
+        let promptItems = buildPromptItems(items, preferredSet);
 
         let expandedWindowUsed = false;
         if (promptItems.length < 3 && fetchWindow < 48) {
@@ -113,16 +152,10 @@ export async function POST(request: Request) {
           result = await fetchRecentNews(activeSources, fetchWindow);
           items = result.items;
           sourceResults = result.results;
-          promptItems = dedupe(items.filter((item) => !item.isPlaceholder));
-          promptItems.sort((a, b) => {
-            const lhsPreferred = preferredSet.has(a.source);
-            const rhsPreferred = preferredSet.has(b.source);
-            if (lhsPreferred !== rhsPreferred) {
-              return lhsPreferred ? -1 : 1;
-            }
-            return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-          });
+          promptItems = buildPromptItems(items, preferredSet);
         }
+
+        promptItems = ensureSourceCoverage(promptItems, items, sourceResults, preferredSet);
 
         const contributing = sourceResults.filter((result) => {
           return result.status === "success" && (result.count ?? 0) > 0;
