@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import Parser from "rss-parser";
+import Parser, { type Item } from "rss-parser";
 import { NewsItem, Source, SourceResult } from "./types";
 
 const parser = new Parser({
@@ -8,17 +8,12 @@ const parser = new Parser({
   }
 });
 
-type RSSItem = {
-  title?: string;
-  link?: string;
-  pubDate?: string;
-  isoDate?: string;
-  contentSnippet?: string;
-  content?: string;
-  creator?: string;
-  author?: string;
-  enclosure?: { url?: string };
-  [key: string]: unknown;
+type RSSItem = Item & {
+  author?: string | null;
+  creator?: string | null;
+  contentSnippet?: string | null;
+  content?: string | null;
+  "media:content"?: { url?: string };
 };
 
 function safeDate(value?: string) {
@@ -30,11 +25,10 @@ function safeDate(value?: string) {
 }
 
 function extractImage(item: RSSItem) {
-  const enclosure = item.enclosure as { url?: string } | undefined;
-  if (enclosure?.url) {
-    return enclosure.url;
+  if (item.enclosure?.url) {
+    return item.enclosure.url;
   }
-  const media = item["media:content"] as { url?: string } | undefined;
+  const media = item["media:content"];
   if (media?.url) {
     return media.url;
   }
@@ -43,8 +37,8 @@ function extractImage(item: RSSItem) {
 
 async function fetchRSS(url: string): Promise<RSSItem[]> {
   const feed = await parser.parseURL(url);
-  const items = (feed.items as unknown) as RSSItem[];
-  return items ?? [];
+  const feedItems = feed.items ?? [];
+  return feedItems.map((item) => item as RSSItem);
 }
 
 function normalizeHost(value: string) {
