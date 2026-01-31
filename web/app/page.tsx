@@ -14,7 +14,7 @@ import {
 } from "../lib/storage";
 import { BriefSections, Source, SourceResult, SourceType } from "../lib/types";
 
-type TabKey = "dashboard" | "brief" | "sources" | "settings";
+type TabKey = "dashboard" | "brief" | "sources" | "onboarding" | "settings";
 
 type Tab = { key: TabKey; label: string };
 
@@ -22,6 +22,7 @@ const tabs: Tab[] = [
   { key: "dashboard", label: "Dashboard" },
   { key: "brief", label: "Brief" },
   { key: "sources", label: "Sources" },
+  { key: "onboarding", label: "Guide" },
   { key: "settings", label: "Settings" }
 ];
 
@@ -33,6 +34,29 @@ const defaultSettings: StoredSettings = {
   timeWindowHours: 24,
   theme: "system"
 };
+
+const onboardingSteps = [
+  {
+    title: "Add your API key",
+    body:
+      "Head to Settings → add your OpenAI key (or use OPENAI_API_KEY via Vercel) so the brief editor can call the Responses API."
+  },
+  {
+    title: "Enable sources",
+    body:
+      "Pick preferred feeds from the recommended catalog, mark favorites, and turn on scraping for newsletters without RSS."
+  },
+  {
+    title: "Generate & explore",
+    body:
+      "Use the brief tab to read the headline, expand sections, and click source pills for context."
+  },
+  {
+    title: "Save & share",
+    body:
+      "Share the markdown from the iOS app, revisit archived briefs, and repeat the workflow daily."
+  }
+];
 
 export default function Page() {
   const [settings, setSettings] = useState<StoredSettings>(defaultSettings);
@@ -46,6 +70,7 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [isHealthLoading, setIsHealthLoading] = useState(false);
   const [lastHealthUpdate, setLastHealthUpdate] = useState<string>("");
+  const [shareStatus, setShareStatus] = useState("");
   const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
     otherStories: false,
@@ -344,6 +369,41 @@ export default function Page() {
     }
   };
 
+  const shareBrief = async () => {
+    if (!brief) {
+      setShareStatus("Generate a brief first.");
+      return;
+    }
+    const text = `The AI Brief\n${brief.topline}\n${brief.signalSummary}\n${brief.watchlist?.join("\n") ?? ""}`.trim();
+    const payload = `${text}\n${typeof window !== "undefined" ? window.location.href : ""}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "The AI Brief",
+          text,
+          url: typeof window !== "undefined" ? window.location.href : undefined
+        });
+        setShareStatus("Shared!");
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(payload);
+        setShareStatus("Brief copied to clipboard.");
+      } else {
+        const temp = document.createElement("textarea");
+        temp.value = payload;
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        setShareStatus("Brief copied to clipboard.");
+      }
+    } catch {
+      setShareStatus("Share canceled.");
+    }
+    window.setTimeout(() => setShareStatus(""), 2000);
+  };
+
   const sourceHealthPanel = (
     <div className="panel">
       <div className="briefSectionHeader">
@@ -384,23 +444,26 @@ export default function Page() {
               and theme controls.
             </div>
           </div>
-          <div className="topActions">
-            <div className="segmented" role="group" aria-label="Theme">
-              {(["system", "light", "dark"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  className={settings.theme === mode ? "active" : ""}
-                  onClick={() => updateSettings({ theme: mode })}
-                  type="button"
-                >
-                  {mode[0].toUpperCase() + mode.slice(1)}
-                </button>
-              ))}
-            </div>
-            <button className="btn btnPrimary" onClick={generateBrief} disabled={isLoading}>
-              {isLoading ? "Generating..." : "Generate Brief"}
-            </button>
+        <div className="topActions">
+          <div className="segmented" role="group" aria-label="Theme">
+            {(["system", "light", "dark"] as const).map((mode) => (
+              <button
+                key={mode}
+                className={settings.theme === mode ? "active" : ""}
+                onClick={() => updateSettings({ theme: mode })}
+                type="button"
+              >
+                {mode[0].toUpperCase() + mode.slice(1)}
+              </button>
+            ))}
           </div>
+          <button className="btn btnPrimary" onClick={generateBrief} disabled={isLoading}>
+            {isLoading ? "Generating..." : "Generate Brief"}
+          </button>
+          <button className="btn btnGhost" onClick={shareBrief} type="button">
+            Share Brief
+          </button>
+        </div>
         </header>
 
         <div className="row">
@@ -409,7 +472,18 @@ export default function Page() {
           {expandedWindowUsed && <span className="chip">Expanded to 48h window</span>}
           {status && <span className="chip">{status}</span>}
           {error && <span className="chip" style={{ color: "#b91c1c" }}>{error}</span>}
+          {shareStatus && <span className="chip">{shareStatus}</span>}
         </div>
+        <a
+          className="newUserBadge"
+          href="#onboarding"
+          onClick={(event) => {
+            event.preventDefault();
+            setActiveTab("onboarding");
+          }}
+        >
+          📘 New to The AI Brief? Follow the onboarding → 
+        </a>
 
         <nav className="tabBar" aria-label="Primary">
           {tabs.map((tab) => (
@@ -932,6 +1006,24 @@ export default function Page() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "onboarding" && (
+            <div className="panel stack">
+              <h2>Onboarding + Guide</h2>
+              <div className="onboarding" id="onboarding">
+                <h3>Onboarding checklist</h3>
+                <p className="kicker">Walk through these steps to get The AI Brief running.</p>
+                <div className="onboardingGrid">
+                  {onboardingSteps.map((step) => (
+                    <div key={step.title} className="onboardingCard">
+                      <div className="subCardTitle">{step.title}</div>
+                      <p className="kicker">{step.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

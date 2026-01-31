@@ -243,6 +243,26 @@ a {
   align-items: center;
 }
 
+.newUserBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(120deg, rgba(15, 118, 110, 0.15), rgba(247, 169, 38, 0.2));
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.newUserBadge:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-1px);
+}
+
 .btn {
   border-radius: 999px;
   border: 1px solid var(--stroke);
@@ -331,6 +351,65 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
+}
+
+.onboarding {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  isolation: isolate;
+}
+
+.onboarding::before,
+.onboarding::after {
+  content: "";
+  position: absolute;
+  border-radius: calc(var(--radius) + 4px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.onboarding::before {
+  inset: -4px;
+  background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.45), transparent 60%);
+  opacity: 0.6;
+}
+
+.onboarding::after {
+  inset: -10px;
+  background: radial-gradient(circle at bottom right, rgba(247, 169, 38, 0.35), transparent 60%);
+  opacity: 0.4;
+}
+
+.onboardingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.onboardingCard {
+  background: var(--bg-2);
+  border-radius: 14px;
+  border: 1px dashed var(--stroke);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.howTo {
+  margin-top: 40px;
+}
+
+.howToGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .dashboardGrid {
