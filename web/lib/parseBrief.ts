@@ -11,20 +11,6 @@ function valueFrom(line: string, label: string) {
   return line.slice(idx + label.length).replace(/^[:\s-]+/, "").trim();
 }
 
-function cleanBullets(lines: string[]) {
-  return lines
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((trimmed) => {
-      if (trimmed.startsWith("- ")) return trimmed.slice(2).trim();
-      if (trimmed.startsWith("•")) return trimmed.slice(1).trim();
-      if (/^\d+\)/.test(trimmed)) {
-        return trimmed.replace(/^\d+\)/, "").trim();
-      }
-      return trimmed;
-    });
-}
-
 function parseSourceAndURL(line: string) {
   const source = valueFrom(line, "Source");
   const urlMatch = line.match(/https?:\/\/\S+/i);
@@ -253,9 +239,15 @@ export function parseBrief(text: string): BriefSections {
       buffer = [];
       continue;
     }
-    if (lower.startsWith("tomorrow's radar") || lower.startsWith("tomorrows radar") || lower.startsWith("watchlist")) {
+    if (lower.startsWith("tools & launches") || lower.startsWith("tools and launches")) {
       commit(currentKey, buffer, sections);
-      currentKey = "radar";
+      currentKey = "toolsandlaunches";
+      buffer = [];
+      continue;
+    }
+    if (lower.startsWith("quick links") || lower.startsWith("also worth reading") || lower.startsWith("worth reading")) {
+      commit(currentKey, buffer, sections);
+      currentKey = "quicklinks";
       buffer = [];
       continue;
     }
@@ -270,7 +262,8 @@ export function parseBrief(text: string): BriefSections {
   const otherStories = parseSignals(sections.signals ?? []);
   const deepDives = parseDeepDives(sections.deepdives ?? []);
   const promptStudio = parsePromptPack(sections.promptpack ?? []);
-  const radar = cleanBullets(sections.radar ?? []);
+  const toolsAndLaunches = parseDeepDives(sections.toolsandlaunches ?? []);
+  const quickLinks = parseDeepDives(sections.quicklinks ?? []);
 
   return {
     headline: headline || text.trim(),
@@ -278,6 +271,7 @@ export function parseBrief(text: string): BriefSections {
     otherStories,
     deepDives,
     promptStudio,
-    radar
+    toolsAndLaunches,
+    quickLinks
   };
 }

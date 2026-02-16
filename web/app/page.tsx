@@ -69,7 +69,8 @@ export default function Page() {
     otherStories: false,
     deepDives: false,
     promptStudio: false,
-    radar: false
+    toolsAndLaunches: false,
+    quickLinks: false
   });
   const [isOffline, setIsOffline] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);

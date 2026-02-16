@@ -26,7 +26,14 @@ const sampleBrief: BriefSections = {
       outputFormat: "Bug list"
     }
   ],
-  radar: ["Gemini 2.5 benchmarks expected Friday", "EU AI Act deadline in March"]
+  toolsAndLaunches: [
+    { story: "Gemini 2.5 Flash released", source: "Google AI Blog", url: "https://ai.googleblog.com/gemini" },
+    { story: "Hugging Face agent toolkit launched", source: "Hugging Face", url: "" }
+  ],
+  quickLinks: [
+    { story: "EU AI Act deadline in March", source: "Reuters", url: "https://reuters.com/ai-act" },
+    { story: "Stanford code benchmark released", source: "Stanford HAI", url: "https://hai.stanford.edu/bench" }
+  ]
 };
 
 describe("formatBriefMarkdown", () => {
@@ -55,10 +62,16 @@ describe("formatBriefMarkdown", () => {
     expect(md).toContain("**Prompt:** Review this code for bugs");
   });
 
-  it("includes radar", () => {
+  it("includes tools and launches", () => {
     const md = formatBriefMarkdown(sampleBrief);
-    expect(md).toContain("## Tomorrow's Radar");
-    expect(md).toContain("Gemini 2.5");
+    expect(md).toContain("## Tools & Launches");
+    expect(md).toContain("Gemini 2.5 Flash released");
+  });
+
+  it("includes quick links", () => {
+    const md = formatBriefMarkdown(sampleBrief);
+    expect(md).toContain("## Quick Links");
+    expect(md).toContain("EU AI Act deadline in March");
   });
 
   it("handles empty brief", () => {
@@ -68,7 +81,8 @@ describe("formatBriefMarkdown", () => {
       otherStories: [],
       deepDives: [],
       promptStudio: [],
-      radar: []
+      toolsAndLaunches: [],
+      quickLinks: []
     };
     const md = formatBriefMarkdown(empty);
     expect(md).toContain("# The AI Brief");
@@ -83,7 +97,8 @@ describe("formatBriefPlainText", () => {
     expect(text).toContain("Other Stories:");
     expect(text).toContain("Deep Dives:");
     expect(text).toContain("Prompt Studio:");
-    expect(text).toContain("Tomorrow's Radar:");
+    expect(text).toContain("Tools & Launches:");
+    expect(text).toContain("Quick Links:");
   });
 
   it("includes source attribution", () => {
@@ -138,10 +153,16 @@ describe("formatBriefHTML", () => {
     expect(html).toContain("Developers");
   });
 
-  it("includes radar section", () => {
+  it("includes tools and launches section", () => {
     const html = formatBriefHTML(sampleBrief);
-    expect(html).toContain("Tomorrow&#39;s Radar");
-    expect(html).toContain("Gemini 2.5 benchmarks expected Friday");
+    expect(html).toContain("Tools &amp; Launches");
+    expect(html).toContain("Gemini 2.5 Flash released");
+  });
+
+  it("includes quick links section", () => {
+    const html = formatBriefHTML(sampleBrief);
+    expect(html).toContain("Quick Links");
+    expect(html).toContain("EU AI Act deadline in March");
   });
 
   it("includes dark mode and print styles", () => {
@@ -157,7 +178,8 @@ describe("formatBriefHTML", () => {
       otherStories: [],
       deepDives: [],
       promptStudio: [],
-      radar: []
+      toolsAndLaunches: [],
+      quickLinks: []
     };
     const html = formatBriefHTML(xssBrief);
     expect(html).not.toContain("<script>");

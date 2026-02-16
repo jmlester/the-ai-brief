@@ -48,11 +48,24 @@ export function formatBriefMarkdown(brief: BriefSections): string {
     }
   }
 
-  if (brief.radar?.length) {
-    lines.push("## Tomorrow's Radar");
+  if (brief.toolsAndLaunches?.length) {
+    lines.push("## Tools & Launches");
     lines.push("");
-    for (const item of brief.radar) {
-      lines.push(`- ${item}`);
+    for (const item of brief.toolsAndLaunches) {
+      const link = item.url ? ` — ${item.url}` : "";
+      const src = item.source ? ` (${item.source})` : "";
+      lines.push(`- ${item.story}${src}${link}`);
+    }
+    lines.push("");
+  }
+
+  if (brief.quickLinks?.length) {
+    lines.push("## Quick Links");
+    lines.push("");
+    for (const item of brief.quickLinks) {
+      const link = item.url ? ` — ${item.url}` : "";
+      const src = item.source ? ` (${item.source})` : "";
+      lines.push(`- ${item.story}${src}${link}`);
     }
     lines.push("");
   }
@@ -98,10 +111,20 @@ export function formatBriefPlainText(brief: BriefSections): string {
     lines.push("");
   }
 
-  if (brief.radar?.length) {
-    lines.push("Tomorrow's Radar:");
-    for (const item of brief.radar) {
-      lines.push(`  - ${item}`);
+  if (brief.toolsAndLaunches?.length) {
+    lines.push("Tools & Launches:");
+    for (const item of brief.toolsAndLaunches) {
+      const src = item.source ? ` (${item.source})` : "";
+      lines.push(`  - ${item.story}${src}`);
+    }
+    lines.push("");
+  }
+
+  if (brief.quickLinks?.length) {
+    lines.push("Quick Links:");
+    for (const item of brief.quickLinks) {
+      const src = item.source ? ` (${item.source})` : "";
+      lines.push(`  - ${item.story}${src}`);
     }
     lines.push("");
   }
@@ -170,10 +193,20 @@ export function formatBriefHTML(brief: BriefSections): string {
     }
   }
 
-  if (brief.radar?.length) {
-    body += `<h2>Tomorrow&#39;s Radar</h2>\n<ul>\n`;
-    for (const item of brief.radar) {
-      body += `<li>${esc(item)}</li>\n`;
+  if (brief.toolsAndLaunches?.length) {
+    body += `<h2>Tools &amp; Launches</h2>\n<ul>\n`;
+    for (const item of brief.toolsAndLaunches) {
+      const src = item.source ? ` <span class="source">${esc(item.source)}</span>` : "";
+      body += `<li>${storyLink(item.story, item.url)}${src}</li>\n`;
+    }
+    body += `</ul>\n`;
+  }
+
+  if (brief.quickLinks?.length) {
+    body += `<h2>Quick Links</h2>\n<ul>\n`;
+    for (const item of brief.quickLinks) {
+      const src = item.source ? ` <span class="source">${esc(item.source)}</span>` : "";
+      body += `<li>${storyLink(item.story, item.url)}${src}</li>\n`;
     }
     body += `</ul>\n`;
   }

@@ -59,9 +59,17 @@ Prompt Studio:
    Output Format: <what the model should return>
 (Provide 2-3 prompts.)
 
-Tomorrow's Radar:
-- <2-3 full-sentence, concrete watch items tied to the provided sources>
-(Do NOT include Source/URL lines here. Each bullet should be a single sentence. Avoid generic language. Each item must reference a specific company, product, model, or policy mentioned in the sources and be distinct from Other Stories and Deep Dives.)
+Tools & Launches:
+- Story: <1 sentence describing a new tool, product, or release>
+  Source: <source name>
+  URL: <full link>
+(Provide 3-5 items. Focus on newly announced tools, products, APIs, model releases, and open-source projects mentioned in the sources.)
+
+Quick Links:
+- Story: <1 sentence about an additional noteworthy story>
+  Source: <source name>
+  URL: <full link>
+(Provide 3-5 additional stories worth reading that didn't make the main sections above.)
 
 Critical constraints:
 - Do not ask the user for more sources or items.
@@ -70,7 +78,7 @@ Critical constraints:
 - Avoid duplicate sentences across sections; each item should be unique.
 - Ensure that each distinct source listed above is referenced at least once in Other Stories or Deep Dives so the brief reflects the full set of provided news.
 - When you mention a source, use the exact source name from the list and base the sentence on the associated title and URL so it is grounded.
-- Each Other Stories item, Deep Dive, and Radar entry MUST be unique — no repeated story across sections.
+- Each Other Stories item, Deep Dive, Tools & Launches item, and Quick Link MUST be unique — no repeated story across sections.
 - Other Stories must have at least 3 themes with at least 2 items each.
 - Deep Dives must have at least 2 items. Prompt Studio must have at least 2 prompts.
 - If an author is provided for a source item, you may credit them (e.g. "per Author Name").

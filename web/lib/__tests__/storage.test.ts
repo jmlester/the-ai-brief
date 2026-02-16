@@ -17,7 +17,8 @@ const mockBrief: BriefSections = {
   otherStories: [],
   deepDives: [],
   promptStudio: [],
-  radar: []
+  toolsAndLaunches: [],
+  quickLinks: []
 };
 
 describe("storage", () => {

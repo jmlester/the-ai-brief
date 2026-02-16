@@ -217,19 +217,83 @@ export default function BriefTab({
         </BriefCard>
 
         <BriefCard
-          title="Tomorrow's Radar"
-          badge="Watchlist"
-          sectionKey="radar"
-          collapsed={!!collapsedSections.radar}
+          title="Tools & Launches"
+          badge="New"
+          sectionKey="toolsAndLaunches"
+          collapsed={!!collapsedSections.toolsAndLaunches}
           onToggle={onToggleSection}
-          emptyText="Watchlist items appear here."
-          isEmpty={!brief?.radar?.length}
+          emptyText="New tools and launches appear here."
+          isEmpty={!brief?.toolsAndLaunches?.length}
         >
-          <ul className="list">
-            {brief?.radar?.map((item, index) => (
-              <li key={`${item}-${index}`}>{item}</li>
-            ))}
-          </ul>
+          <div className="subCardGrid">
+            {brief?.toolsAndLaunches?.map((item, index) => {
+              const homeUrl = item.source ? sourceHomeUrl(item.source) : "";
+              return (
+                <div className="subCard" key={`${item.story}-${index}`}>
+                  <div className="subCardTitle">
+                    {item.url ? (
+                      <a className="link" href={item.url} target="_blank" rel="noreferrer">
+                        {item.story}
+                      </a>
+                    ) : (
+                      item.story
+                    )}
+                  </div>
+                  <div className="subCardFooter">
+                    {item.source && (
+                      homeUrl ? (
+                        <a className="sourcePill" href={homeUrl} target="_blank" rel="noreferrer">
+                          {item.source}
+                        </a>
+                      ) : (
+                        <span className="sourcePill">{item.source}</span>
+                      )
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </BriefCard>
+
+        <BriefCard
+          title="Quick Links"
+          badge="More"
+          sectionKey="quickLinks"
+          collapsed={!!collapsedSections.quickLinks}
+          onToggle={onToggleSection}
+          emptyText="Additional stories appear here."
+          isEmpty={!brief?.quickLinks?.length}
+        >
+          <div className="subCardGrid">
+            {brief?.quickLinks?.map((item, index) => {
+              const homeUrl = item.source ? sourceHomeUrl(item.source) : "";
+              return (
+                <div className="subCard" key={`${item.story}-${index}`}>
+                  <div className="subCardTitle">
+                    {item.url ? (
+                      <a className="link" href={item.url} target="_blank" rel="noreferrer">
+                        {item.story}
+                      </a>
+                    ) : (
+                      item.story
+                    )}
+                  </div>
+                  <div className="subCardFooter">
+                    {item.source && (
+                      homeUrl ? (
+                        <a className="sourcePill" href={homeUrl} target="_blank" rel="noreferrer">
+                          {item.source}
+                        </a>
+                      ) : (
+                        <span className="sourcePill">{item.source}</span>
+                      )
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </BriefCard>
       </div>
 

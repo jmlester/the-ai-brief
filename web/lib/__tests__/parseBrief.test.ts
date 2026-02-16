@@ -41,10 +41,27 @@ Prompt Studio:
    Input Format: Meeting transcript
    Output Format: Structured summary
 
-Tomorrow's Radar:
-- Google DeepMind is expected to release Gemini 2.5 benchmarks by end of week.
-- The EU AI Act compliance deadline approaches for high-risk systems in March.
-- Meta's next LLaMA model may ship with native tool-use capabilities.`;
+Tools & Launches:
+- Story: Google releases Gemini 2.5 Flash with native tool-use support
+  Source: Google AI Blog
+  URL: https://ai.googleblog.com/gemini-flash
+- Story: Hugging Face launches open-source agent toolkit
+  Source: Hugging Face
+  URL: https://huggingface.co/agent-toolkit
+- Story: Vercel ships AI SDK 4.0 with streaming improvements
+  Source: Vercel Blog
+  URL: https://vercel.com/blog/ai-sdk-4
+
+Quick Links:
+- Story: EU AI Act compliance deadline approaches for high-risk systems
+  Source: Reuters
+  URL: https://reuters.com/eu-ai-act-deadline
+- Story: Stanford releases new benchmark for LLM code generation
+  Source: Stanford HAI
+  URL: https://hai.stanford.edu/code-bench
+- Story: Meta publishes research on efficient fine-tuning methods
+  Source: Meta AI
+  URL: https://ai.meta.com/fine-tuning`;
 
   it("parses headline", () => {
     const result = parseBrief(sampleText);
@@ -86,11 +103,22 @@ Tomorrow's Radar:
     expect(result.promptStudio[1].task).toBe("Meeting summarizer");
   });
 
-  it("parses radar items", () => {
+  it("parses tools and launches", () => {
     const result = parseBrief(sampleText);
-    expect(result.radar).toHaveLength(3);
-    expect(result.radar[0]).toContain("Google DeepMind");
-    expect(result.radar[2]).toContain("LLaMA");
+    expect(result.toolsAndLaunches).toHaveLength(3);
+    expect(result.toolsAndLaunches[0].story).toContain("Gemini 2.5 Flash");
+    expect(result.toolsAndLaunches[0].source).toBe("Google AI Blog");
+    expect(result.toolsAndLaunches[0].url).toBe("https://ai.googleblog.com/gemini-flash");
+    expect(result.toolsAndLaunches[2].story).toContain("Vercel");
+  });
+
+  it("parses quick links", () => {
+    const result = parseBrief(sampleText);
+    expect(result.quickLinks).toHaveLength(3);
+    expect(result.quickLinks[0].story).toContain("EU AI Act");
+    expect(result.quickLinks[0].source).toBe("Reuters");
+    expect(result.quickLinks[0].url).toBe("https://reuters.com/eu-ai-act-deadline");
+    expect(result.quickLinks[2].story).toContain("Meta");
   });
 
   it("handles empty input", () => {
@@ -99,7 +127,8 @@ Tomorrow's Radar:
     expect(result.otherStories).toEqual([]);
     expect(result.deepDives).toEqual([]);
     expect(result.promptStudio).toEqual([]);
-    expect(result.radar).toEqual([]);
+    expect(result.toolsAndLaunches).toEqual([]);
+    expect(result.quickLinks).toEqual([]);
   });
 
   it("falls back headline to full text if no headline section", () => {

@@ -50,7 +50,8 @@ export type BriefSections = {
     inputFormat: string;
     outputFormat: string;
   }[];
-  radar: string[];
+  toolsAndLaunches: { story: string; source: string; url: string }[];
+  quickLinks: { story: string; source: string; url: string }[];
 };
 
 export type ArchivedBrief = {
