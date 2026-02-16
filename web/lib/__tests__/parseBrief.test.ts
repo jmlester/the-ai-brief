@@ -135,4 +135,51 @@ Quick Links:
     const result = parseBrief("Just some random text without any sections");
     expect(result.headline).toBe("Just some random text without any sections");
   });
+
+  it("handles markdown-formatted section headings", () => {
+    const mdText = `## Headline:
+AI agents take off
+
+## Summary:
+Big week for agents.
+
+## Other Stories:
+- Theme: Infra
+  - Story: Cloud costs rise
+    Source: TechCrunch
+    URL: https://techcrunch.com/cloud
+
+## Deep Dives:
+- Story: Reasoning models explained
+  Source: ArXiv
+  URL: https://arxiv.org/reasoning
+
+## Prompt Studio:
+1) Task: Summarizer
+   Prompt: Summarize this
+   Best For: Everyone
+   Input Format: Text
+   Output Format: Bullets
+
+## Tools & Launches:
+- Story: New vector DB released
+  Source: Pinecone Blog
+  URL: https://pinecone.io/new
+
+## Quick Links:
+- Story: AI hiring surges in Q1
+  Source: Bloomberg
+  URL: https://bloomberg.com/ai-hiring`;
+
+    const result = parseBrief(mdText);
+    expect(result.headline).toBe("AI agents take off");
+    expect(result.summary).toBe("Big week for agents.");
+    expect(result.otherStories).toHaveLength(1);
+    expect(result.deepDives).toHaveLength(1);
+    expect(result.promptStudio).toHaveLength(1);
+    expect(result.toolsAndLaunches).toHaveLength(1);
+    expect(result.toolsAndLaunches[0].story).toContain("vector DB");
+    expect(result.quickLinks).toHaveLength(1);
+    expect(result.quickLinks[0].story).toContain("AI hiring");
+  });
 });

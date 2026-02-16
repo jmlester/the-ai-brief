@@ -204,7 +204,10 @@ export function parseBrief(text: string): BriefSections {
 
   for (const raw of lines) {
     const trimmed = raw.trim();
-    const lower = trimmed.toLowerCase();
+    // Strip markdown heading prefixes (## ) and bold markers (**) so
+    // "## Headline:" and "**Headline:**" are detected the same as "Headline:"
+    const stripped = trimmed.replace(/^#{1,4}\s+/, "").replace(/^\*{1,2}/, "").replace(/\*{1,2}$/, "");
+    const lower = stripped.toLowerCase();
     if (lower.startsWith("headline") || lower.startsWith("topline")) {
       commit(currentKey, buffer, sections);
       currentKey = "headline";
