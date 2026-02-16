@@ -321,20 +321,25 @@ export default function Page() {
       const message = err instanceof Error ? err.message : "Unexpected error";
 
       // Auto-retry once on timeout/abort
-      if (retryRef.current === 0 && (err instanceof DOMException && err.name === "AbortError" || message.includes("timeout"))) {
+      const isAbort =
+        (err instanceof DOMException && err.name === "AbortError") ||
+        message.includes("aborted") ||
+        message.includes("timeout");
+      if (retryRef.current === 0 && isAbort) {
         retryRef.current = 1;
         setPhase("retrying");
         setStatus("Retrying...");
-        setIsLoading(true);
         generateBrief(true);
         return;
       }
 
-      setError(message);
+      setError(isAbort ? "Request timed out. Try again." : message);
       setPhase("error");
       setStatus("");
+      setIsLoading(false);
     } finally {
-      if (phase !== "retrying") setIsLoading(false);
+      // Only clear loading if we didn't already handle it above (retry or error)
+      if (retryRef.current === 0) setIsLoading(false);
     }
   };
 

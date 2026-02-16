@@ -262,6 +262,14 @@ export async function POST(request: Request) {
         });
         controller.close();
       } catch (error) {
+        // Client disconnected — nothing to send
+        if (
+          error instanceof Error &&
+          (error.message.includes("aborted") || error.message.includes("Controller is already closed"))
+        ) {
+          try { controller.close(); } catch { /* already closed */ }
+          return;
+        }
         const message = error instanceof Error ? error.message : "Unexpected error";
         fail(message);
       }
