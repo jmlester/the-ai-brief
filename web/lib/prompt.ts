@@ -17,7 +17,10 @@ export function buildPrompt(options: {
   const toneDescription = toneDescriptions[tone] ?? toneDescriptions.practical;
   const newsLines = news
     .slice(0, 20)
-    .map((item) => `- ${item.title} | ${item.source} | ${item.url}`)
+    .map((item) => {
+      const author = item.author ? ` | By: ${item.author}` : "";
+      return `- ${item.title} | ${item.source} | ${item.url}${author}`;
+    })
     .join("\n");
   const topicsLine = focusTopics.trim().length === 0 ? "None provided." : focusTopics.trim();
   const preferredLine = preferredSources.length === 0 ? "None" : preferredSources.join(", ");
@@ -67,6 +70,10 @@ Critical constraints:
 - Avoid duplicate sentences across sections; each item should be unique.
 - Ensure that each distinct source listed above is referenced at least once in Other Stories or Deep Dives so the brief reflects the full set of provided news.
 - When you mention a source, use the exact source name from the list and base the sentence on the associated title and URL so it is grounded.
+- Each Other Stories item, Deep Dive, and Radar entry MUST be unique — no repeated story across sections.
+- Other Stories must have at least 3 themes with at least 2 items each.
+- Deep Dives must have at least 2 items. Prompt Studio must have at least 2 prompts.
+- If an author is provided for a source item, you may credit them (e.g. "per Author Name").
 
 ${newsLines.length === 0 ? "- No items available" : newsLines}`;
 }

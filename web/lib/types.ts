@@ -52,3 +52,39 @@ export type BriefSections = {
   }[];
   radar: string[];
 };
+
+export type ArchivedBrief = {
+  id: string;
+  brief: BriefSections;
+  sourceResults: SourceResult[];
+  coverageSummary: string;
+  createdAt: string;
+};
+
+export type SavedPrompt = {
+  id: string;
+  task: string;
+  prompt: string;
+  bestFor: string;
+  inputFormat: string;
+  outputFormat: string;
+  savedAt: string;
+};
+
+export type StreamingPhase =
+  | "idle"
+  | "connecting"
+  | "collecting"
+  | "streaming"
+  | "parsing"
+  | "ready"
+  | "error"
+  | "retrying";
+
+export type ModelPreset = {
+  name: string;
+  model: string;
+  tone: string;
+  focusTopics: string;
+  timeWindowHours: number;
+};

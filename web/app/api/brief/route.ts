@@ -53,9 +53,11 @@ function sortPromptItems(items: NewsItem[], preferredSet: Set<string>) {
 }
 
 function buildPromptItems(rawItems: NewsItem[], preferredSet: Set<string>) {
-  const deduped = dedupe(rawItems.filter((item) => !item.isPlaceholder));
+  const nonPlaceholder = rawItems.filter((item) => !item.isPlaceholder);
+  const deduped = dedupe(nonPlaceholder);
   sortPromptItems(deduped, preferredSet);
-  return deduped;
+  const dedupCount = nonPlaceholder.length - deduped.length;
+  return { items: deduped, dedupCount };
 }
 
 function ensureSourceCoverage(
@@ -142,7 +144,9 @@ export async function POST(request: Request) {
         let items = result.items;
         let sourceResults = result.results;
 
-        let promptItems = buildPromptItems(items, preferredSet);
+        let built = buildPromptItems(items, preferredSet);
+        let promptItems = built.items;
+        let totalDedupCount = built.dedupCount;
 
         let expandedWindowUsed = false;
         if (promptItems.length < 3 && fetchWindow < 48) {
@@ -152,7 +156,9 @@ export async function POST(request: Request) {
           result = await fetchRecentNews(activeSources, fetchWindow);
           items = result.items;
           sourceResults = result.results;
-          promptItems = buildPromptItems(items, preferredSet);
+          built = buildPromptItems(items, preferredSet);
+          promptItems = built.items;
+          totalDedupCount = built.dedupCount;
         }
 
         promptItems = ensureSourceCoverage(promptItems, items, sourceResults, preferredSet);
@@ -251,7 +257,8 @@ export async function POST(request: Request) {
           text: fullText,
           sourceResults,
           coverageSummary,
-          expandedWindowUsed
+          expandedWindowUsed,
+          dedupCount: totalDedupCount
         });
         controller.close();
       } catch (error) {
