@@ -133,8 +133,14 @@ export async function POST(request: Request) {
         controller.close();
       };
 
+      let keepalive: ReturnType<typeof setInterval> | undefined;
       try {
-        send("status", { message: "Collecting sources..." });
+        send("status", { message: `Collecting ${activeSources.length} sources...` });
+
+        // Send keepalive every 10s so the client knows we're still working
+        keepalive = setInterval(() => {
+          send("status", { message: `Still collecting sources...` });
+        }, 10_000);
 
         const preferredSources = activeSources.filter((s) => s.isPreferred).map((s) => s.name);
         const preferredSet = new Set(preferredSources);
@@ -160,6 +166,8 @@ export async function POST(request: Request) {
           promptItems = built.items;
           totalDedupCount = built.dedupCount;
         }
+
+        clearInterval(keepalive);
 
         promptItems = ensureSourceCoverage(promptItems, items, sourceResults, preferredSet);
 
@@ -262,6 +270,7 @@ export async function POST(request: Request) {
         });
         controller.close();
       } catch (error) {
+        clearInterval(keepalive);
         // Client disconnected — nothing to send
         if (
           error instanceof Error &&

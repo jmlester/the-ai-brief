@@ -47,7 +47,7 @@ const defaultSettings: StoredSettings = {
   theme: "system"
 };
 
-const STREAM_TIMEOUT_MS = 30_000;
+const STREAM_TIMEOUT_MS = 120_000;
 
 export default function Page() {
   const [settings, setSettings] = useState<StoredSettings>(defaultSettings);
